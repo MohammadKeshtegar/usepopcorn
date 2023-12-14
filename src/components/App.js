@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
 import StarRating from "./StarRating";
+import { Loader } from "./Loader";
+import { Error } from "./Error";
+import { Search } from "./Search";
+import { Logo } from "./Logo";
+import { Results } from "./Results";
+import { Box } from "./Box";
 
 const KEY = "2502729f";
 
@@ -106,12 +112,8 @@ export default function App() {
   );
 }
 
-function Loader() {
-  return <p className="loader">Loading...</p>;
-}
-
-function Error({ message }) {
-  return <p className="error">💥 {message} 💥</p>;
+function Main({ children }) {
+  return <main className="main">{children}</main>;
 }
 
 function NavBar({ children }) {
@@ -120,48 +122,6 @@ function NavBar({ children }) {
       <Logo />
       {children}
     </nav>
-  );
-}
-
-function Logo() {
-  return <h1 role="img">🍿usePopcorn</h1>;
-}
-
-function Search({ query, setQuery }) {
-  return (
-    <input
-      type="text"
-      placeholder="Search moive..."
-      className="search"
-      value={query}
-      onChange={(e) => setQuery(e.target.value)}
-    />
-  );
-}
-
-function Results() {
-  return (
-    <p className="results">
-      found <strong>X</strong> movies
-    </p>
-  );
-}
-
-function Main({ children }) {
-  return <main className="main">{children}</main>;
-}
-
-function Box({ children }) {
-  const [isOpen, setIsOpen] = useState(true);
-
-  return (
-    <div className="box">
-      <button className="btn-toggle" onClick={() => setIsOpen((open) => !open)}>
-        {isOpen ? "-" : "+"}
-      </button>
-
-      {isOpen && children}
-    </div>
   );
 }
 
@@ -247,6 +207,23 @@ function MoiveDetails({ selectedId, onAddMovie, onCloseMovie }) {
       fetchMoive();
     },
     [selectedId]
+  );
+
+  useEffect(
+    function () {
+      function callBack(e) {
+        if (e.code === "Escape") {
+          onCloseMovie();
+        }
+      }
+      document.addEventListener("keydown", callBack);
+
+      // The reason why we use a cleanup function is that each time a new movie component mounts a new addEventListener added to the document, basicly an additional one to the one we already have.
+      return function () {
+        document.addEventListener("keydown", callBack);
+      };
+    },
+    [onCloseMovie]
   );
 
   return (
